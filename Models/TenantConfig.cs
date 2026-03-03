@@ -9,36 +9,15 @@ public class TenantConfig
     public string SecondaryColor { get; set; } = string.Empty;
     public string BackgroundColor { get; set; } = string.Empty;
     public string TextColor { get; set; } = string.Empty;
-    public HeroConfig Hero { get; set; } = new();
-    public List<FeatureConfig> Features { get; set; } = [];
-    public FooterConfig Footer { get; set; } = new();
+    public string Template { get; set; } = string.Empty;
+    public List<TenantComponent> Components { get; set; } = [];
     public List<TenantModule> Modules { get; set; } = [];
 }
 
-public class HeroConfig
+public class TenantComponent
 {
-    public string Title { get; set; } = string.Empty;
-    public string Subtitle { get; set; } = string.Empty;
-    public string CtaText { get; set; } = string.Empty;
-    public string CtaLink { get; set; } = string.Empty;
-    public string BackgroundImage { get; set; } = string.Empty;
-}
-
-public class FeatureConfig
-{
-    public string Icon { get; set; } = string.Empty;
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-}
-
-public class FooterConfig
-{
-    public string Text { get; set; } = string.Empty;
-    public List<FooterLink> Links { get; set; } = [];
-}
-
-public class FooterLink
-{
-    public string Label { get; set; } = string.Empty;
-    public string Url { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public int Order { get; set; }
+    public bool Visible { get; set; } = true;
+    public Dictionary<string, object> Data { get; set; } = [];
 }

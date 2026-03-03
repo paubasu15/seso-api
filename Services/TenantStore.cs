@@ -24,29 +24,61 @@ public class TenantStore
             SecondaryColor = "#991B1B",
             BackgroundColor = "#0F0F0F",
             TextColor = "#F8FAFC",
-            Hero = new HeroConfig
-            {
-                Title = "Bienvenido a SESO",
-                Subtitle = "La plataforma SaaS multi-tenant para tu negocio",
-                CtaText = "Comenzar ahora",
-                CtaLink = "/app",
-                BackgroundImage = ""
-            },
-            Features =
+            Template = "default",
+            Components =
             [
-                new FeatureConfig { Icon = "rocket", Title = "Rápido", Description = "Despliegue en minutos" },
-                new FeatureConfig { Icon = "shield", Title = "Seguro", Description = "Protección total de datos" },
-                new FeatureConfig { Icon = "chart", Title = "Analytics", Description = "Datos en tiempo real" }
+                new TenantComponent
+                {
+                    Type = "header",
+                    Order = 1,
+                    Visible = true,
+                    Data = new Dictionary<string, object> { ["logo"] = "/images/seso-logo.png" }
+                },
+                new TenantComponent
+                {
+                    Type = "hero",
+                    Order = 2,
+                    Visible = true,
+                    Data = new Dictionary<string, object>
+                    {
+                        ["title"] = "Bienvenido a SESO",
+                        ["subtitle"] = "La plataforma SaaS multi-tenant para tu negocio",
+                        ["ctaText"] = "Comenzar ahora",
+                        ["ctaLink"] = "/app",
+                        ["backgroundImage"] = ""
+                    }
+                },
+                new TenantComponent
+                {
+                    Type = "features",
+                    Order = 3,
+                    Visible = true,
+                    Data = new Dictionary<string, object>
+                    {
+                        ["items"] = new[]
+                        {
+                            new Dictionary<string, object> { ["icon"] = "rocket", ["title"] = "Rápido", ["description"] = "Despliegue en minutos" },
+                            new Dictionary<string, object> { ["icon"] = "shield", ["title"] = "Seguro", ["description"] = "Protección total de datos" },
+                            new Dictionary<string, object> { ["icon"] = "chart", ["title"] = "Analytics", ["description"] = "Datos en tiempo real" }
+                        }
+                    }
+                },
+                new TenantComponent
+                {
+                    Type = "footer",
+                    Order = 10,
+                    Visible = true,
+                    Data = new Dictionary<string, object>
+                    {
+                        ["text"] = "© 2026 SESO. Todos los derechos reservados.",
+                        ["links"] = new[]
+                        {
+                            new Dictionary<string, object> { ["label"] = "Términos", ["url"] = "/terms" },
+                            new Dictionary<string, object> { ["label"] = "Privacidad", ["url"] = "/privacy" }
+                        }
+                    }
+                }
             ],
-            Footer = new FooterConfig
-            {
-                Text = "© 2026 SESO. Todos los derechos reservados.",
-                Links =
-                [
-                    new FooterLink { Label = "Términos", Url = "/terms" },
-                    new FooterLink { Label = "Privacidad", Url = "/privacy" }
-                ]
-            },
             Modules =
             [
                 new TenantModule { Id = "landing-editor", Name = "Editor de Landing", Icon = "edit", Active = true },
@@ -65,29 +97,61 @@ public class TenantStore
             SecondaryColor = "#1E40AF",
             BackgroundColor = "#F8FAFC",
             TextColor = "#1E293B",
-            Hero = new HeroConfig
-            {
-                Title = "Bienvenido a Acme",
-                Subtitle = "La mejor solución para tu negocio",
-                CtaText = "Comenzar ahora",
-                CtaLink = "/app",
-                BackgroundImage = ""
-            },
-            Features =
+            Template = "corporate",
+            Components =
             [
-                new FeatureConfig { Icon = "rocket", Title = "Rápido", Description = "Velocidad increíble" },
-                new FeatureConfig { Icon = "shield", Title = "Seguro", Description = "Protección total" },
-                new FeatureConfig { Icon = "chart", Title = "Analytics", Description = "Datos en tiempo real" }
+                new TenantComponent
+                {
+                    Type = "header",
+                    Order = 1,
+                    Visible = true,
+                    Data = new Dictionary<string, object> { ["logo"] = "/images/acme-logo.png" }
+                },
+                new TenantComponent
+                {
+                    Type = "hero",
+                    Order = 2,
+                    Visible = true,
+                    Data = new Dictionary<string, object>
+                    {
+                        ["title"] = "Bienvenido a Acme",
+                        ["subtitle"] = "La mejor solución para tu negocio",
+                        ["ctaText"] = "Comenzar ahora",
+                        ["ctaLink"] = "/app",
+                        ["backgroundImage"] = ""
+                    }
+                },
+                new TenantComponent
+                {
+                    Type = "features",
+                    Order = 3,
+                    Visible = true,
+                    Data = new Dictionary<string, object>
+                    {
+                        ["items"] = new[]
+                        {
+                            new Dictionary<string, object> { ["icon"] = "rocket", ["title"] = "Rápido", ["description"] = "Velocidad increíble" },
+                            new Dictionary<string, object> { ["icon"] = "shield", ["title"] = "Seguro", ["description"] = "Protección total" },
+                            new Dictionary<string, object> { ["icon"] = "chart", ["title"] = "Analytics", ["description"] = "Datos en tiempo real" }
+                        }
+                    }
+                },
+                new TenantComponent
+                {
+                    Type = "footer",
+                    Order = 10,
+                    Visible = true,
+                    Data = new Dictionary<string, object>
+                    {
+                        ["text"] = "© 2026 Acme Corp. Todos los derechos reservados.",
+                        ["links"] = new[]
+                        {
+                            new Dictionary<string, object> { ["label"] = "Términos", ["url"] = "/terms" },
+                            new Dictionary<string, object> { ["label"] = "Privacidad", ["url"] = "/privacy" }
+                        }
+                    }
+                }
             ],
-            Footer = new FooterConfig
-            {
-                Text = "© 2026 Acme Corp. Todos los derechos reservados.",
-                Links =
-                [
-                    new FooterLink { Label = "Términos", Url = "/terms" },
-                    new FooterLink { Label = "Privacidad", Url = "/privacy" }
-                ]
-            },
             Modules =
             [
                 new TenantModule { Id = "landing-editor", Name = "Editor de Landing", Icon = "edit", Active = true },
@@ -106,30 +170,64 @@ public class TenantStore
             SecondaryColor = "#15803D",
             BackgroundColor = "#F0FDF4",
             TextColor = "#14532D",
-            Hero = new HeroConfig
-            {
-                Title = "Bienvenido a Globex",
-                Subtitle = "Soluciones globales para empresas locales",
-                CtaText = "Explorar",
-                CtaLink = "/app",
-                BackgroundImage = ""
-            },
-            Features =
+            Template = "nature",
+            Components =
             [
-                new FeatureConfig { Icon = "globe", Title = "Global", Description = "Presencia mundial" },
-                new FeatureConfig { Icon = "shield", Title = "Confiable", Description = "Años de experiencia" },
-                new FeatureConfig { Icon = "chart", Title = "Crecimiento", Description = "Escala con tu negocio" }
+                new TenantComponent
+                {
+                    Type = "header",
+                    Order = 1,
+                    Visible = true,
+                    Data = new Dictionary<string, object> { ["logo"] = "/images/globex-logo.png" }
+                },
+                new TenantComponent
+                {
+                    Type = "hero",
+                    Order = 2,
+                    Visible = true,
+                    Data = new Dictionary<string, object>
+                    {
+                        ["title"] = "Bienvenido a Globex",
+                        ["subtitle"] = "Soluciones globales para empresas locales",
+                        ["ctaText"] = "Explorar",
+                        ["ctaLink"] = "/app",
+                        ["backgroundImage"] = ""
+                    }
+                },
+                new TenantComponent
+                {
+                    Type = "features",
+                    Order = 3,
+                    Visible = true,
+                    Data = new Dictionary<string, object>
+                    {
+                        ["items"] = new[]
+                        {
+                            new Dictionary<string, object> { ["icon"] = "globe", ["title"] = "Global", ["description"] = "Presencia mundial" },
+                            new Dictionary<string, object> { ["icon"] = "shield", ["title"] = "Confiable", ["description"] = "Años de experiencia" },
+                            new Dictionary<string, object> { ["icon"] = "chart", ["title"] = "Crecimiento", ["description"] = "Escala con tu negocio" }
+                        }
+                    }
+                },
+                new TenantComponent { Type = "testimonials", Order = 4, Visible = false, Data = [] },
+                new TenantComponent { Type = "pricing", Order = 5, Visible = false, Data = [] },
+                new TenantComponent
+                {
+                    Type = "footer",
+                    Order = 10,
+                    Visible = true,
+                    Data = new Dictionary<string, object>
+                    {
+                        ["text"] = "© 2026 Globex. Todos los derechos reservados.",
+                        ["links"] = new[]
+                        {
+                            new Dictionary<string, object> { ["label"] = "Términos", ["url"] = "/terms" },
+                            new Dictionary<string, object> { ["label"] = "Privacidad", ["url"] = "/privacy" },
+                            new Dictionary<string, object> { ["label"] = "Contacto", ["url"] = "/contact" }
+                        }
+                    }
+                }
             ],
-            Footer = new FooterConfig
-            {
-                Text = "© 2026 Globex. Todos los derechos reservados.",
-                Links =
-                [
-                    new FooterLink { Label = "Términos", Url = "/terms" },
-                    new FooterLink { Label = "Privacidad", Url = "/privacy" },
-                    new FooterLink { Label = "Contacto", Url = "/contact" }
-                ]
-            },
             Modules =
             [
                 new TenantModule { Id = "landing-editor", Name = "Editor de Landing", Icon = "edit", Active = true },
@@ -158,9 +256,8 @@ public class TenantStore
             if (request.SecondaryColor is not null) existing.SecondaryColor = request.SecondaryColor;
             if (request.BackgroundColor is not null) existing.BackgroundColor = request.BackgroundColor;
             if (request.TextColor is not null) existing.TextColor = request.TextColor;
-            if (request.Hero is not null) existing.Hero = request.Hero;
-            if (request.Features is not null) existing.Features = request.Features;
-            if (request.Footer is not null) existing.Footer = request.Footer;
+            if (request.Template is not null) existing.Template = request.Template;
+            if (request.Components is not null) existing.Components = request.Components;
         }
 
         return true;
