@@ -1,0 +1,15 @@
+namespace SesoApi.Endpoints;
+
+public static class HealthEndpoints
+{
+    public static void MapHealthEndpoints(this WebApplication app)
+    {
+        app.MapGet("/api/health", () => Results.Ok(new
+        {
+            status = "ok",
+            timestamp = DateTime.UtcNow
+        }))
+        .WithName("GetHealth")
+        .WithTags("Health");
+    }
+}
