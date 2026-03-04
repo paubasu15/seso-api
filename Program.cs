@@ -1,7 +1,6 @@
 using SesoApi.Endpoints;
 using SesoApi.Middleware;
 using SesoApi.Services;
-using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +28,8 @@ builder.Services.AddCors(options =>
 });
 
 // OpenAPI / Swagger
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -39,8 +39,8 @@ app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 // Endpoints
