@@ -1,7 +1,6 @@
-using SesoApi.Endpoints;
+﻿using SesoApi.Endpoints;
 using SesoApi.Middleware;
 using SesoApi.Services;
-using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,8 +27,9 @@ builder.Services.AddCors(options =>
     });
 });
 
-// OpenAPI / Swagger
-builder.Services.AddOpenApi();
+// ✅ Swagger para .NET 8
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -39,8 +39,9 @@ app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    // ✅ Swagger UI para .NET 8
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 // Endpoints
