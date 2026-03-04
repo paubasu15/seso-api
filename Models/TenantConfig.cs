@@ -12,6 +12,7 @@ public class TenantConfig
     public string Template { get; set; } = string.Empty;
     public List<TenantComponent> Components { get; set; } = [];
     public List<TenantModule> Modules { get; set; } = [];
+    public bool HasDraft { get; set; }
 }
 
 public class TenantComponent

@@ -27,7 +27,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ✅ Swagger para .NET 8
+// OpenAPI / Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -39,7 +39,6 @@ app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
-    // ✅ Swagger UI para .NET 8
     app.UseSwagger();
     app.UseSwaggerUI();
 }
