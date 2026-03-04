@@ -8,130 +8,43 @@ public class TenantStore
     private readonly ConcurrentDictionary<string, TenantConfig> _published = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, TenantConfig> _drafts = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _updateLock = new();
+    private readonly TemplateRegistry _templateRegistry;
 
-    // Template catalog: each template lists its component types in order with default data
-    private static readonly Dictionary<string, List<TenantComponent>> TemplateDefaults = new(StringComparer.OrdinalIgnoreCase)
+    public TenantStore(TemplateRegistry templateRegistry)
     {
-        ["default"] =
-        [
-            new TenantComponent { Type = "header", Order = 1, Visible = true, Data = new Dictionary<string, object> { ["logo"] = "" } },
-            new TenantComponent { Type = "hero", Order = 2, Visible = true, Data = new Dictionary<string, object> { ["title"] = "Bienvenido", ["subtitle"] = "La plataforma SaaS multi-tenant para tu negocio", ["ctaText"] = "Comenzar ahora", ["ctaLink"] = "/app", ["backgroundImage"] = "" } },
-            new TenantComponent { Type = "features", Order = 3, Visible = true, Data = new Dictionary<string, object> { ["items"] = new List<object> { new Dictionary<string, object> { ["icon"] = "rocket", ["title"] = "Rápido", ["description"] = "Despliegue en minutos" }, new Dictionary<string, object> { ["icon"] = "shield", ["title"] = "Seguro", ["description"] = "Protección total de datos" }, new Dictionary<string, object> { ["icon"] = "chart", ["title"] = "Analytics", ["description"] = "Datos en tiempo real" } } } },
-            new TenantComponent { Type = "footer", Order = 10, Visible = true, Data = new Dictionary<string, object> { ["text"] = "© 2026. Todos los derechos reservados.", ["links"] = new List<object> { new Dictionary<string, object> { ["label"] = "Términos", ["url"] = "/terms" }, new Dictionary<string, object> { ["label"] = "Privacidad", ["url"] = "/privacy" } } } }
-        ],
-        ["corporate"] =
-        [
-            new TenantComponent { Type = "header", Order = 1, Visible = true, Data = new Dictionary<string, object> { ["logo"] = "" } },
-            new TenantComponent { Type = "hero", Order = 2, Visible = true, Data = new Dictionary<string, object> { ["title"] = "Bienvenido", ["subtitle"] = "La mejor solución para tu negocio", ["ctaText"] = "Comenzar ahora", ["ctaLink"] = "/app", ["backgroundImage"] = "" } },
-            new TenantComponent { Type = "features", Order = 3, Visible = true, Data = new Dictionary<string, object> { ["items"] = new List<object> { new Dictionary<string, object> { ["icon"] = "rocket", ["title"] = "Rápido", ["description"] = "Velocidad increíble" }, new Dictionary<string, object> { ["icon"] = "shield", ["title"] = "Seguro", ["description"] = "Protección total" }, new Dictionary<string, object> { ["icon"] = "chart", ["title"] = "Analytics", ["description"] = "Datos en tiempo real" } } } },
-            new TenantComponent { Type = "footer", Order = 10, Visible = true, Data = new Dictionary<string, object> { ["text"] = "© 2026. Todos los derechos reservados.", ["links"] = new List<object> { new Dictionary<string, object> { ["label"] = "Términos", ["url"] = "/terms" }, new Dictionary<string, object> { ["label"] = "Privacidad", ["url"] = "/privacy" } } } }
-        ],
-        ["nature"] =
-        [
-            new TenantComponent { Type = "header", Order = 1, Visible = true, Data = new Dictionary<string, object> { ["logo"] = "" } },
-            new TenantComponent { Type = "hero", Order = 2, Visible = true, Data = new Dictionary<string, object> { ["title"] = "Bienvenido", ["subtitle"] = "Soluciones globales para empresas locales", ["ctaText"] = "Explorar", ["ctaLink"] = "/app", ["backgroundImage"] = "" } },
-            new TenantComponent { Type = "features", Order = 3, Visible = true, Data = new Dictionary<string, object> { ["items"] = new List<object> { new Dictionary<string, object> { ["icon"] = "globe", ["title"] = "Global", ["description"] = "Presencia mundial" }, new Dictionary<string, object> { ["icon"] = "shield", ["title"] = "Confiable", ["description"] = "Años de experiencia" }, new Dictionary<string, object> { ["icon"] = "chart", ["title"] = "Crecimiento", ["description"] = "Escala con tu negocio" } } } },
-            new TenantComponent { Type = "testimonials", Order = 4, Visible = false, Data = new Dictionary<string, object> { ["title"] = "Lo que dicen nuestros clientes", ["items"] = new List<object> { new Dictionary<string, object> { ["name"] = "Cliente Ejemplo", ["role"] = "CEO, Empresa", ["text"] = "Excelente servicio y atención." } } } },
-            new TenantComponent { Type = "pricing", Order = 5, Visible = false, Data = new Dictionary<string, object> { ["title"] = "Planes y precios", ["items"] = new List<object>() } },
-            new TenantComponent { Type = "footer", Order = 10, Visible = true, Data = new Dictionary<string, object> { ["text"] = "© 2026. Todos los derechos reservados.", ["links"] = new List<object> { new Dictionary<string, object> { ["label"] = "Términos", ["url"] = "/terms" }, new Dictionary<string, object> { ["label"] = "Privacidad", ["url"] = "/privacy" }, new Dictionary<string, object> { ["label"] = "Contacto", ["url"] = "/contact" } } } }
-        ],
-        ["starter"] =
-        [
-            new TenantComponent { Type = "header", Order = 1, Visible = true, Data = new Dictionary<string, object> { ["logo"] = "" } },
-            new TenantComponent { Type = "hero", Order = 2, Visible = true, Data = new Dictionary<string, object> { ["title"] = "Bienvenido", ["subtitle"] = "Tu negocio en línea", ["ctaText"] = "Empezar", ["ctaLink"] = "/app", ["backgroundImage"] = "" } },
-            new TenantComponent { Type = "features", Order = 3, Visible = true, Data = new Dictionary<string, object> { ["items"] = new List<object>() } },
-            new TenantComponent { Type = "footer", Order = 10, Visible = true, Data = new Dictionary<string, object> { ["text"] = "© 2026. Todos los derechos reservados.", ["links"] = new List<object>() } }
-        ],
-        ["business"] =
-        [
-            new TenantComponent { Type = "header", Order = 1, Visible = true, Data = new Dictionary<string, object> { ["logo"] = "" } },
-            new TenantComponent { Type = "hero", Order = 2, Visible = true, Data = new Dictionary<string, object> { ["title"] = "Bienvenido", ["subtitle"] = "Tu negocio en línea", ["ctaText"] = "Empezar", ["ctaLink"] = "/app", ["backgroundImage"] = "" } },
-            new TenantComponent { Type = "features", Order = 3, Visible = true, Data = new Dictionary<string, object> { ["items"] = new List<object>() } },
-            new TenantComponent { Type = "testimonials", Order = 4, Visible = true, Data = new Dictionary<string, object> { ["title"] = "Lo que dicen nuestros clientes", ["items"] = new List<object> { new Dictionary<string, object> { ["name"] = "Cliente Ejemplo", ["role"] = "CEO, Empresa", ["text"] = "Excelente servicio y atención." } } } },
-            new TenantComponent { Type = "pricing", Order = 5, Visible = true, Data = new Dictionary<string, object> { ["title"] = "Planes y precios", ["items"] = new List<object>() } },
-            new TenantComponent { Type = "footer", Order = 10, Visible = true, Data = new Dictionary<string, object> { ["text"] = "© 2026. Todos los derechos reservados.", ["links"] = new List<object>() } }
-        ]
-    };
-
-    public TenantStore()
-    {
+        _templateRegistry = templateRegistry;
         Seed();
     }
 
     private void Seed()
     {
-        _published["default"] = new TenantConfig
+        var defaultModules = new List<TenantModule>
         {
-            Slug = "default",
-            Name = "SESO",
+            new TenantModule { Id = "landing-editor", Name = "Editor de Landing", Icon = "edit", Active = true },
+            new TenantModule { Id = "analytics", Name = "Analytics", Icon = "chart", Active = true },
+            new TenantModule { Id = "crm", Name = "CRM", Icon = "users", Active = true },
+            new TenantModule { Id = "email-marketing", Name = "Email Marketing", Icon = "mail", Active = false }
+        };
+
+        // demo → starter template
+        _published["demo"] = new TenantConfig
+        {
+            Slug = "demo",
+            Name = "SESO Demo",
             Logo = "/images/seso-logo.png",
             PrimaryColor = "#DC2626",
             SecondaryColor = "#991B1B",
             BackgroundColor = "#0F0F0F",
             TextColor = "#F8FAFC",
-            Template = "default",
-            Components =
-            [
-                new TenantComponent
-                {
-                    Type = "header",
-                    Order = 1,
-                    Visible = true,
-                    Data = new Dictionary<string, object> { ["logo"] = "/images/seso-logo.png" }
-                },
-                new TenantComponent
-                {
-                    Type = "hero",
-                    Order = 2,
-                    Visible = true,
-                    Data = new Dictionary<string, object>
-                    {
-                        ["title"] = "Bienvenido a SESO",
-                        ["subtitle"] = "La plataforma SaaS multi-tenant para tu negocio",
-                        ["ctaText"] = "Comenzar ahora",
-                        ["ctaLink"] = "/app",
-                        ["backgroundImage"] = ""
-                    }
-                },
-                new TenantComponent
-                {
-                    Type = "features",
-                    Order = 3,
-                    Visible = true,
-                    Data = new Dictionary<string, object>
-                    {
-                        ["items"] = new[]
-                        {
-                            new Dictionary<string, object> { ["icon"] = "rocket", ["title"] = "Rápido", ["description"] = "Despliegue en minutos" },
-                            new Dictionary<string, object> { ["icon"] = "shield", ["title"] = "Seguro", ["description"] = "Protección total de datos" },
-                            new Dictionary<string, object> { ["icon"] = "chart", ["title"] = "Analytics", ["description"] = "Datos en tiempo real" }
-                        }
-                    }
-                },
-                new TenantComponent
-                {
-                    Type = "footer",
-                    Order = 10,
-                    Visible = true,
-                    Data = new Dictionary<string, object>
-                    {
-                        ["text"] = "© 2026 SESO. Todos los derechos reservados.",
-                        ["links"] = new[]
-                        {
-                            new Dictionary<string, object> { ["label"] = "Términos", ["url"] = "/terms" },
-                            new Dictionary<string, object> { ["label"] = "Privacidad", ["url"] = "/privacy" }
-                        }
-                    }
-                }
-            ],
-            Modules =
-            [
-                new TenantModule { Id = "landing-editor", Name = "Editor de Landing", Icon = "edit", Active = true },
-                new TenantModule { Id = "analytics", Name = "Analytics", Icon = "chart", Active = true },
-                new TenantModule { Id = "crm", Name = "CRM", Icon = "users", Active = true },
-                new TenantModule { Id = "email-marketing", Name = "Email Marketing", Icon = "mail", Active = false }
-            ]
+            Template = "starter",
+            Components = _templateRegistry.GetDefaultComponents("starter"),
+            Modules = defaultModules.Select(m => new TenantModule { Id = m.Id, Name = m.Name, Icon = m.Icon, Active = m.Active }).ToList()
         };
+
+        // acme → business template
+        var acmeComponents = _templateRegistry.GetDefaultComponents("business");
+        var acmeHeader = acmeComponents.FirstOrDefault(c => c.Type == "header");
+        if (acmeHeader is not null) acmeHeader.Data["logo"] = "/images/acme-logo.png";
 
         _published["acme"] = new TenantConfig
         {
@@ -142,144 +55,39 @@ public class TenantStore
             SecondaryColor = "#1E40AF",
             BackgroundColor = "#F8FAFC",
             TextColor = "#1E293B",
-            Template = "corporate",
-            Components =
-            [
-                new TenantComponent
-                {
-                    Type = "header",
-                    Order = 1,
-                    Visible = true,
-                    Data = new Dictionary<string, object> { ["logo"] = "/images/acme-logo.png" }
-                },
-                new TenantComponent
-                {
-                    Type = "hero",
-                    Order = 2,
-                    Visible = true,
-                    Data = new Dictionary<string, object>
-                    {
-                        ["title"] = "Bienvenido a Acme",
-                        ["subtitle"] = "La mejor solución para tu negocio",
-                        ["ctaText"] = "Comenzar ahora",
-                        ["ctaLink"] = "/app",
-                        ["backgroundImage"] = ""
-                    }
-                },
-                new TenantComponent
-                {
-                    Type = "features",
-                    Order = 3,
-                    Visible = true,
-                    Data = new Dictionary<string, object>
-                    {
-                        ["items"] = new[]
-                        {
-                            new Dictionary<string, object> { ["icon"] = "rocket", ["title"] = "Rápido", ["description"] = "Velocidad increíble" },
-                            new Dictionary<string, object> { ["icon"] = "shield", ["title"] = "Seguro", ["description"] = "Protección total" },
-                            new Dictionary<string, object> { ["icon"] = "chart", ["title"] = "Analytics", ["description"] = "Datos en tiempo real" }
-                        }
-                    }
-                },
-                new TenantComponent
-                {
-                    Type = "footer",
-                    Order = 10,
-                    Visible = true,
-                    Data = new Dictionary<string, object>
-                    {
-                        ["text"] = "© 2026 Acme Corp. Todos los derechos reservados.",
-                        ["links"] = new[]
-                        {
-                            new Dictionary<string, object> { ["label"] = "Términos", ["url"] = "/terms" },
-                            new Dictionary<string, object> { ["label"] = "Privacidad", ["url"] = "/privacy" }
-                        }
-                    }
-                }
-            ],
-            Modules =
-            [
-                new TenantModule { Id = "landing-editor", Name = "Editor de Landing", Icon = "edit", Active = true },
-                new TenantModule { Id = "analytics", Name = "Analytics", Icon = "chart", Active = true },
-                new TenantModule { Id = "crm", Name = "CRM", Icon = "users", Active = false },
-                new TenantModule { Id = "email-marketing", Name = "Email Marketing", Icon = "mail", Active = false }
-            ]
+            Template = "business",
+            Components = acmeComponents,
+            Modules = defaultModules.Select(m => new TenantModule { Id = m.Id, Name = m.Name, Icon = m.Icon, Active = m.Id != "crm" && m.Id != "email-marketing" }).ToList()
         };
 
-        _published["globex"] = new TenantConfig
+        // creative → portfolio template
+        _published["creative"] = new TenantConfig
         {
-            Slug = "globex",
-            Name = "Globex",
-            Logo = "/images/globex-logo.png",
-            PrimaryColor = "#16A34A",
-            SecondaryColor = "#15803D",
-            BackgroundColor = "#F0FDF4",
-            TextColor = "#14532D",
-            Template = "nature",
-            Components =
-            [
-                new TenantComponent
-                {
-                    Type = "header",
-                    Order = 1,
-                    Visible = true,
-                    Data = new Dictionary<string, object> { ["logo"] = "/images/globex-logo.png" }
-                },
-                new TenantComponent
-                {
-                    Type = "hero",
-                    Order = 2,
-                    Visible = true,
-                    Data = new Dictionary<string, object>
-                    {
-                        ["title"] = "Bienvenido a Globex",
-                        ["subtitle"] = "Soluciones globales para empresas locales",
-                        ["ctaText"] = "Explorar",
-                        ["ctaLink"] = "/app",
-                        ["backgroundImage"] = ""
-                    }
-                },
-                new TenantComponent
-                {
-                    Type = "features",
-                    Order = 3,
-                    Visible = true,
-                    Data = new Dictionary<string, object>
-                    {
-                        ["items"] = new[]
-                        {
-                            new Dictionary<string, object> { ["icon"] = "globe", ["title"] = "Global", ["description"] = "Presencia mundial" },
-                            new Dictionary<string, object> { ["icon"] = "shield", ["title"] = "Confiable", ["description"] = "Años de experiencia" },
-                            new Dictionary<string, object> { ["icon"] = "chart", ["title"] = "Crecimiento", ["description"] = "Escala con tu negocio" }
-                        }
-                    }
-                },
-                new TenantComponent { Type = "testimonials", Order = 4, Visible = false, Data = [] },
-                new TenantComponent { Type = "pricing", Order = 5, Visible = false, Data = [] },
-                new TenantComponent
-                {
-                    Type = "footer",
-                    Order = 10,
-                    Visible = true,
-                    Data = new Dictionary<string, object>
-                    {
-                        ["text"] = "© 2026 Globex. Todos los derechos reservados.",
-                        ["links"] = new[]
-                        {
-                            new Dictionary<string, object> { ["label"] = "Términos", ["url"] = "/terms" },
-                            new Dictionary<string, object> { ["label"] = "Privacidad", ["url"] = "/privacy" },
-                            new Dictionary<string, object> { ["label"] = "Contacto", ["url"] = "/contact" }
-                        }
-                    }
-                }
-            ],
-            Modules =
-            [
-                new TenantModule { Id = "landing-editor", Name = "Editor de Landing", Icon = "edit", Active = true },
-                new TenantModule { Id = "analytics", Name = "Analytics", Icon = "chart", Active = true },
-                new TenantModule { Id = "crm", Name = "CRM", Icon = "users", Active = true },
-                new TenantModule { Id = "email-marketing", Name = "Email Marketing", Icon = "mail", Active = true }
-            ]
+            Slug = "creative",
+            Name = "Creative Studio",
+            Logo = "/images/creative-logo.png",
+            PrimaryColor = "#8B5CF6",
+            SecondaryColor = "#6D28D9",
+            BackgroundColor = "#1E1B4B",
+            TextColor = "#EDE9FE",
+            Template = "portfolio",
+            Components = _templateRegistry.GetDefaultComponents("portfolio"),
+            Modules = defaultModules.Select(m => new TenantModule { Id = m.Id, Name = m.Name, Icon = m.Icon, Active = m.Id is "landing-editor" or "analytics" }).ToList()
+        };
+
+        // shop → ecommerce template
+        _published["shop"] = new TenantConfig
+        {
+            Slug = "shop",
+            Name = "My Shop",
+            Logo = "/images/shop-logo.png",
+            PrimaryColor = "#F59E0B",
+            SecondaryColor = "#D97706",
+            BackgroundColor = "#FFFBEB",
+            TextColor = "#1C1917",
+            Template = "ecommerce",
+            Components = _templateRegistry.GetDefaultComponents("ecommerce"),
+            Modules = defaultModules.Select(m => new TenantModule { Id = m.Id, Name = m.Name, Icon = m.Icon, Active = true }).ToList()
         };
     }
 
@@ -404,9 +212,10 @@ public class TenantStore
         }
     }
 
-    private static List<TenantComponent> MergeComponentsForTemplate(string templateName, List<TenantComponent> existing)
+    private List<TenantComponent> MergeComponentsForTemplate(string templateName, List<TenantComponent> existing)
     {
-        if (!TemplateDefaults.TryGetValue(templateName, out var templateComponents))
+        var templateComponents = _templateRegistry.GetDefaultComponents(templateName);
+        if (templateComponents.Count == 0)
             return existing;
 
         var existingByType = existing.ToDictionary(c => c.Type, StringComparer.OrdinalIgnoreCase);

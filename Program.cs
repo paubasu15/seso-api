@@ -5,6 +5,7 @@ using SesoApi.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Services
+builder.Services.AddSingleton<TemplateRegistry>();
 builder.Services.AddSingleton<TenantStore>();
 
 // CORS
@@ -46,5 +47,6 @@ if (app.Environment.IsDevelopment())
 // Endpoints
 app.MapHealthEndpoints();
 app.MapTenantEndpoints();
+app.MapTemplateEndpoints();
 
 app.Run();
